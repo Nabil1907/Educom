@@ -16,6 +16,22 @@ const transporter = nodemailer.createTransport(sendMailer({
      }
  }));
 
+
+
+ exports.getlogin = (req,res,next)=>{
+    let message = req.flash('error');
+    // console.log(' message'+ message)
+    if (message.length > 0) {
+        message = message[0];
+    } else {
+        message = null;
+    }
+
+    res.render('pages/login.html',{
+        errorMessage:message 
+    });
+}
+
 exports.postregister = (req,res,next)=>{
 
     username   = req.body.username;
@@ -65,17 +81,32 @@ exports.postregister = (req,res,next)=>{
 exports.postlogin = (req,res,next)=>{
     email = req.body.email ; 
     password = req.body.password; 
-
+    // if(!email.notEmpty | !password.notEmpty){
+    //     req.flash('error','Please Enter your Email And Password');
+    //     return res.redirect('/login');
+    // }
     User.findOne({email:email})
     .then((user)=>{
         if(!user){
-            console.log("Not Foumd User ! "); 
+            req.flash('error', 'Invalid email or password.');
+            return res.redirect('/login');
         }else{
-            if(user.password === password){
-                res.redirect('/')
-            }
+            bcrypt.compare(password,user.password)
+            .then(doMatch=>{
+                if(doMatch){
+                    // req.session.login = true;
+                    // req.session.user = user ; 
+                    // res.setHeader('Set-Cookie','LogIn=true');
+                    res.redirect('/');
+                }
+                else
+                { 
+                    req.flash('error', 'Invalid email or password.');
+                    return res.redirect('/login');
+                }
+            })
         }
-    })
+    });
 }
 
 exports.getIndex = (req,res,next)=>{
@@ -96,10 +127,6 @@ exports.getContact = (req,res,next)=>{
 
 exports.getGallery = (req,res,next)=>{
     res.render('pages/gallery.html');
-}
-
-exports.getlogin = (req,res,next)=>{
-    res.render('pages/login.html');
 }
 
 exports.getregister = (req,res,next)=>{

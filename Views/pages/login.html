@@ -1,5 +1,9 @@
 ﻿<%- include('../includes/header.html') %> 
-
+<% if(errorMessage){ %> 
+    <div class="alert alert-danger">
+      <div><%= errorMessage %> </div>
+    </div>
+    <% } %>
 
     <!-- Start Login 
     ============================================= -->
